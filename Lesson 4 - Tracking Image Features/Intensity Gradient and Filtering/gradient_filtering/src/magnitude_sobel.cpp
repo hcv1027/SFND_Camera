@@ -6,38 +6,112 @@
 
 using namespace std;
 
-void magnitudeSobel()
-{
-    // load image from file
-    cv::Mat img;
-    img = cv::imread("./images/img1gray.png");
+void magnitudeSobelSol() {
+  // load image from file
+  cv::Mat img;
+  img = cv::imread("../images/img1gray.png");
 
-    // convert image to grayscale
-    cv::Mat imgGray;
-    cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
+  // convert image to grayscale
+  cv::Mat imgGray;
+  cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
 
-    // apply smoothing using the GaussianBlur() function from the OpenCV
-    // ToDo : Add your code here
+  // apply smoothing
+  cv::Mat blurred = imgGray.clone();
+  int filterSize = 5;
+  int stdDev = 2.0;
+  cv::GaussianBlur(imgGray, blurred, cv::Size(filterSize, filterSize), stdDev);
 
-    // create filter kernels using the cv::Mat datatype both for x and y
-    // ToDo : Add your code here
+  // create filter kernels
+  float sobel_x[9] = {-1, 0, +1, -2, 0, +2, -1, 0, +1};
+  cv::Mat kernel_x = cv::Mat(3, 3, CV_32F, sobel_x);
 
-    // apply filter using the OpenCv function filter2D()
-    // ToDo : Add your code here
-    
+  float sobel_y[9] = {-1, -2, -1, 0, 0, 0, +1, +2, +1};
+  cv::Mat kernel_y = cv::Mat(3, 3, CV_32F, sobel_y);
 
-    // compute magnitude image based on the equation presented in the lesson 
-    // ToDo : Add your code here
-    
+  // apply filter
+  cv::Mat result_x, result_y;
+  cv::filter2D(blurred, result_x, -1, kernel_x, cv::Point(-1, -1), 0,
+               cv::BORDER_DEFAULT);
+  cv::filter2D(blurred, result_y, -1, kernel_y, cv::Point(-1, -1), 0,
+               cv::BORDER_DEFAULT);
 
-    // show result
-    string windowName = "Gaussian Blurring";
-    cv::namedWindow(windowName, 1); // create window
-    cv::imshow(windowName, magnitude);
-    cv::waitKey(0); // wait for keyboard input before continuing
+  // compute magnitude image
+  cv::Mat magnitude = imgGray.clone();
+  for (int r = 0; r < magnitude.rows; r++) {
+    for (int c = 0; c < magnitude.cols; c++) {
+      magnitude.at<unsigned char>(r, c) =
+          sqrt(pow(result_x.at<unsigned char>(r, c), 2) +
+               pow(result_y.at<unsigned char>(r, c), 2));
+    }
+  }
+
+  // show result
+  cv::Mat img_array[] = {imgGray, magnitude};
+  cv::Mat concate_img;
+  cv::vconcat(img_array, 2, concate_img);
+
+  string windowName = "Gaussian Blurring";
+  cv::namedWindow(windowName, 1);  // create window
+  cv::imshow(windowName, concate_img);
+  cv::waitKey(0);  // wait for keyboard input before continuing
 }
 
-int main()
-{
-    magnitudeSobel();
+void magnitudeSobel() {
+  // load image from file
+  cv::Mat img;
+  img = cv::imread("../images/img1gray.png");
+
+  // convert image to grayscale
+  cv::Mat imgGray;
+  cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
+
+  // apply smoothing using the GaussianBlur() function from the OpenCV
+  // ToDo : Add your code here
+  cv::Mat blurred;
+  constexpr double sigma = 2.0;
+  // cv::GaussianBlur(imgGray, blurred, cv::Size(5, 5), sigma, sigma,
+  //                  cv::BORDER_DEFAULT);
+  cv::GaussianBlur(imgGray, blurred, cv::Size(5, 5), sigma);
+
+  // create filter kernels using the cv::Mat datatype both for x and y
+  // ToDo : Add your code here
+  float sobel_x[9] = {-1, 0, +1, -2, 0, +2, -1, 0, +1};
+  cv::Mat kernel_x = cv::Mat(3, 3, CV_32F, sobel_x);
+
+  float sobel_y[9] = {-1, -2, -1, 0, 0, 0, +1, +2, +1};
+  cv::Mat kernel_y = cv::Mat(3, 3, CV_32F, sobel_y);
+
+  // apply filter using the OpenCv function filter2D()
+  // ToDo : Add your code here
+  cv::Mat result_x, result_y;
+  cv::filter2D(blurred, result_x, -1, kernel_x, cv::Point(-1, -1), 0,
+               cv::BORDER_DEFAULT);
+  cv::filter2D(blurred, result_y, -1, kernel_x, cv::Point(-1, -1), 0,
+               cv::BORDER_DEFAULT);
+
+  // compute magnitude image based on the equation presented in the lesson
+  // ToDo : Add your code here
+  cv::Mat magnitude = imgGray.clone();
+  for (int r = 0; r < magnitude.rows; r++) {
+    for (int c = 0; c < magnitude.cols; c++) {
+      magnitude.at<unsigned char>(r, c) =
+          sqrt(pow(result_x.at<unsigned char>(r, c), 2) +
+               pow(result_y.at<unsigned char>(r, c), 2));
+    }
+  }
+
+  // show result
+  cv::Mat img_array[] = {imgGray, magnitude};
+  cv::Mat concate_img;
+  cv::vconcat(img_array, 2, concate_img);
+
+  string windowName = "Gaussian Blurring";
+  cv::namedWindow(windowName, 1);  // create window
+  cv::imshow(windowName, concate_img);
+  cv::waitKey(0);  // wait for keyboard input before continuing
+}
+
+int main() {
+  magnitudeSobel();
+  magnitudeSobelSol();
 }
